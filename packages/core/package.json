@@ -1,0 +1,25 @@
+{
+  "name": "@eps/core",
+  "version": "0.2.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1109.0",
+    "@smithy/node-http-handler": "^4.10.0",
+    "better-sqlite3": "^13.0.3",
+    "qrcode": "^1.5.4",
+    "sharp": "^0.35.3"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^9.6.0",
+    "@types/node": "^26.2.0",
+    "@types/qrcode": "^1.5.6",
+    "typescript": "^5.9.3"
+  }
+}

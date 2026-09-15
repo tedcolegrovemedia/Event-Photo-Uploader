@@ -1,0 +1,25 @@
+node_modules/
+dist/
+out/
+release/
+*.tsbuildinfo
+
+# Secrets — never commit
+.env
+.env.local
+*.pem
+
+# Event data (originals + processed cache live outside the repo, but just in case)
+/event/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+
+.DS_Store
+*.log
+
+# Claude Code session config
+.claude/
+
+# Scratch folders
+__TEMP__*/

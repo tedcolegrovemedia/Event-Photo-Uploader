@@ -1,0 +1,26 @@
+{
+  "name": "event-photo-share",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Event photography delivery: shoot, finish group, hand the guest a QR code.",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=20.19"
+  },
+  "scripts": {
+    "build:core": "npm run build -w @eps/core",
+    "dev": "npm run build:core && npm run dev -w @eps/desktop",
+    "dev:gallery": "npm run build:core && npm run dev -w @eps/gallery",
+    "build": "npm run build:core && npm run build -w @eps/desktop && npm run build -w @eps/gallery",
+    "dist:mac": "npm run build:core && npm run dist:mac -w @eps/desktop",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "clean": "rm -rf packages/*/dist apps/*/out apps/*/dist apps/desktop/release",
+    "dist:mac:notarized": "npm run build:core && npm run dist:mac:notarized -w @eps/desktop && ./scripts/notarize-dmg.sh"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

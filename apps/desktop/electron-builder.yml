@@ -1,0 +1,75 @@
+appId: com.eventuploader.app
+productName: Event Uploader
+copyright: Copyright © 2026
+
+directories:
+  output: release
+  buildResources: build
+
+files:
+  - out/**
+  - package.json
+  - '!**/*.map'
+
+# Native modules cannot be loaded from inside the asar archive.
+asarUnpack:
+  - '**/node_modules/sharp/**'
+  - '**/node_modules/@img/**'
+  - '**/node_modules/better-sqlite3/**'
+  - '**/node_modules/bindings/**'
+  - '**/node_modules/file-uri-to-path/**'
+
+# Both native dependencies (better-sqlite3 and sharp) are built on node-addon-api,
+# i.e. N-API — their prebuilt binaries are ABI-stable across Node and Electron
+# alike, so there is nothing to rebuild. Leaving this on makes electron-builder
+# invoke node-gyp, which needs a full Python + Xcode toolchain and fails on any
+# machine that has not run `sudo xcodebuild -license`.
+#
+# If you ever add a native dependency that is NOT N-API, flip this back to true
+# and make sure the build machine has the toolchain.
+npmRebuild: false
+buildDependenciesFromSource: false
+
+mac:
+  category: public.app-category.photography
+  darkModeSupport: true
+  target:
+    - target: dmg
+      arch: [arm64]
+    - target: zip
+      arch: [arm64]
+  # Hardened runtime is required for notarization. Electron needs the JIT
+  # entitlements; the unsigned-memory one is what V8 uses for its code cache.
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  # Notarize via a notarytool keychain profile: run
+  #   xcrun notarytool store-credentials notary --apple-id <id> --team-id <team>
+  # once, then build with APPLE_KEYCHAIN_PROFILE=notary. No secrets in env or files.
+  notarize: true
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+  extendInfo:
+    NSPhotoLibraryUsageDescription: >-
+      Event Uploader reads photos from the capture folder you select.
+    NSDesktopFolderUsageDescription: >-
+      Needed if your camera writes captures to the Desktop.
+    NSDocumentsFolderUsageDescription: >-
+      Needed if your camera writes captures to Documents.
+    NSRemovableVolumesUsageDescription: >-
+      Needed to import photos directly from a camera memory card.
+
+dmg:
+  title: Event Uploader
+  contents:
+    - x: 140
+      y: 200
+      type: file
+    - x: 400
+      y: 200
+      type: link
+      path: /Applications
+
+# Set CSC_LINK / CSC_KEY_PASSWORD and APPLE_ID / APPLE_APP_SPECIFIC_PASSWORD /
+# APPLE_TEAM_ID in the environment to sign and notarize. Without them the build
+# still succeeds, but the event Mac will need the Gatekeeper workaround in the
+# README. See docs/deploying-to-the-event-mac.md.
