@@ -14,6 +14,7 @@ import { pathToFileURL } from 'node:url';
 import {
   Database,
   createStorage,
+  isValidGalleryCode,
   makeThumbnail,
   qrDataUrl,
   qrSvg,
@@ -53,16 +54,24 @@ function createWindow(): void {
       preload: join(__dirname, '../preload/index.js'),
       contextIsolation: true,
       nodeIntegration: false,
-      sandbox: false,
+      // The preload only touches contextBridge/ipcRenderer, so the renderer
+      // can run inside Chromium's OS sandbox. Keep it that way: any Node API
+      // the UI needs belongs behind an IPC handler in this file.
+      sandbox: true,
     },
   });
 
   win.once('ready-to-show', () => win?.show());
 
-  // Never let the renderer navigate away or spawn windows.
+  // Never let the renderer navigate away or spawn windows. Links go to the
+  // default browser, and only web links: a compromised renderer must not be
+  // able to launch file:// or custom-scheme handlers through this path.
   win.webContents.setWindowOpenHandler(({ url }) => {
-    void shell.openExternal(url);
+    if (isWebUrl(url)) void shell.openExternal(url);
     return { action: 'deny' };
+  });
+  win.webContents.on('will-navigate', (e, url) => {
+    if (url !== win?.webContents.getURL()) e.preventDefault();
   });
 
   if (process.env.ELECTRON_RENDERER_URL) {
@@ -159,6 +168,21 @@ app.on('before-quit', () => {
 });
 
 // ------------------------------------------------------------------ helpers
+
+/** Only http(s) may leave the app via shell.openExternal. */
+function isWebUrl(url: string): boolean {
+  try {
+    const u = new URL(url);
+    return u.protocol === 'http:' || u.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
+const escHtml = (s: string): string =>
+  s.replace(/[&<>"']/g, (c) =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!,
+  );
 
 function addLog(line: string): void {
   const stamped = `${new Date().toLocaleTimeString()}  ${line}`;
@@ -319,11 +343,13 @@ function registerIpc(): void {
   });
 
   ipcMain.handle('gallery:qr', async (_e, code: string) => {
+    if (!isValidGalleryCode(code)) throw new Error('Invalid gallery code');
     const url = publicGalleryUrl(settingsStore.get(), event.slug, code);
     return { url, dataUrl: await qrDataUrl(url) };
   });
 
   ipcMain.handle('gallery:print', async (_e, code: string) => {
+    if (!isValidGalleryCode(code)) throw new Error('Invalid gallery code');
     const url = publicGalleryUrl(settingsStore.get(), event.slug, code);
     await printQrCard(code, url);
   });
@@ -332,7 +358,10 @@ function registerIpc(): void {
     clipboard.writeText(text);
   });
 
-  ipcMain.handle('shell:open', (_e, url: string) => shell.openExternal(url));
+  ipcMain.handle('shell:open', async (_e, url: string) => {
+    if (!isWebUrl(url)) throw new Error('Only http(s) links can be opened');
+    await shell.openExternal(url);
+  });
 
   ipcMain.handle('dialog:file', async (_e, current?: string) => {
     const res = await dialog.showOpenDialog({
@@ -418,8 +447,8 @@ async function printQrCard(code: string, url: string): Promise<void> {
 </style>
 <body>
   ${svg}
-  <div class="code">${code}</div>
-  <div class="url">${url}</div>
+  <div class="code">${escHtml(code)}</div>
+  <div class="url">${escHtml(url)}</div>
   <div class="hint">Scan to view and download your photos.</div>
 </body>`;
 

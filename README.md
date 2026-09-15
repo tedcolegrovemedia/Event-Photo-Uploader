@@ -109,6 +109,160 @@ To simulate a shoot, drop JPEGs into the capture folder shown in Settings.
 
 ---
 
+## Setting up S3 on AWS, step by step
+
+This is everything the default static delivery mode needs. Budget about 30
+minutes the first time. [docs/aws-setup.md](docs/aws-setup.md) has the same
+steps with cost estimates, a CloudFront option, and troubleshooting.
+
+Replace `YOUR-BUCKET-NAME` everywhere below. Bucket names are global across
+all of AWS, so pick something like `acme-event-photos-2026`.
+
+### 1. Lock down the root account
+
+1. Sign in at [console.aws.amazon.com](https://console.aws.amazon.com/) with the account email.
+2. Click your account name (top right) → **Security credentials**.
+3. Under **Multi-factor authentication**, click **Assign MFA device** and set one up.
+4. Under **Access keys**, make sure there are none. Delete any that exist. The app never uses root keys.
+
+### 2. Set a budget alert
+
+1. **Billing and Cost Management** → **Budgets** → **Create budget**.
+2. Choose **Zero spend budget** (alert at the first cent) or a **Monthly cost budget** such as US$10.
+3. Enter your email and create it.
+
+A typical event of 300 guests costs well under a dollar. The alert is there in
+case a gallery goes viral.
+
+### 3. Create the bucket
+
+1. **S3** → **Create bucket**.
+2. **Bucket name**: `YOUR-BUCKET-NAME`.
+3. **Region**: pick the one closest to your events, for example `us-east-2`. Write it down.
+4. **Block Public Access**: leave all four boxes **checked** for now. Step 6 opens exactly what guests need.
+5. **Bucket Versioning**: Disable.
+6. **Default encryption**: leave SSE-S3 on.
+7. Click **Create bucket**.
+
+### 4. Create a least-privilege IAM user for the app
+
+1. **IAM** → **Users** → **Create user**.
+2. **User name**: `event-uploader-app`. Do **not** tick "Provide user access to the AWS Management Console".
+3. On **Set permissions**, choose **Attach policies directly** → **Create policy**.
+4. Switch to the **JSON** tab and paste this, replacing the bucket name in all three places:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ReadWriteEventPhotoObjects",
+      "Effect": "Allow",
+      "Action": ["s3:PutObject", "s3:GetObject", "s3:DeleteObject"],
+      "Resource": [
+        "arn:aws:s3:::YOUR-BUCKET-NAME/events/*",
+        "arn:aws:s3:::YOUR-BUCKET-NAME/g/*"
+      ]
+    },
+    {
+      "Sid": "CheckBucketReachable",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": "arn:aws:s3:::YOUR-BUCKET-NAME",
+      "Condition": {
+        "StringLike": { "s3:prefix": ["events/*", "g/*"] }
+      }
+    }
+  ]
+}
+```
+
+5. Name the policy `EventUploaderBucketAccess`, create it, then go back to the user tab, refresh the policy list, tick it, and finish creating the user.
+
+The policy allows writing and deleting objects only under the two prefixes the
+app uses, and never allows listing the whole bucket.
+
+### 5. Create the access key
+
+1. Open the new user → **Security credentials** → **Create access key**.
+2. Choose **Application running outside AWS** → **Next** → **Create access key**.
+3. Copy the **Access key ID** and the **Secret access key**. The secret is shown once.
+
+Enter both straight into the app under **Settings → Storage**. The app encrypts
+the secret into the macOS Keychain. Do not put them in a file in this repo,
+and do not paste them into chat or email.
+
+### 6. Let guests' phones read the galleries
+
+Everything under `events/*` (the photos and each gallery's `index.html`) must
+be readable by a phone. The private manifests under `g/*` stay locked down.
+
+1. **S3** → your bucket → **Permissions** → **Block public access** → **Edit** → untick **Block all public access** → **Save changes** and confirm.
+2. Still under **Permissions**, scroll to **Bucket policy** → **Edit** and paste:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "PublicReadEventImages",
+      "Effect": "Allow",
+      "Principal": "*",
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::YOUR-BUCKET-NAME/events/*"
+    }
+  ]
+}
+```
+
+3. Save.
+
+Do not enable "Static website hosting". The app links to the HTTPS object URL
+directly, and that feature would only add an HTTP-only endpoint.
+
+### 7. Automatic cleanup (optional but recommended)
+
+The expiry the app stamps into each gallery only hides the page. To actually
+delete the files and stop paying for them:
+
+1. **S3** → your bucket → **Management** → **Lifecycle rules** → **Create lifecycle rule**.
+2. Name: `expire-event-photos`. Choose **Limit the scope**, prefix `events/`.
+3. Tick **Expire current versions of objects**, days after creation: `90`.
+4. Create it, then create a second rule with prefix `g/` and the same window.
+
+Keep this longer than the expiry set in the app so a page never outlives its photos.
+
+### 8. Point the app at the bucket
+
+In Event Uploader → **Settings**:
+
+| Field | Value |
+| --- | --- |
+| Delivery | Static page in the bucket |
+| Provider | Amazon S3 |
+| Bucket | `YOUR-BUCKET-NAME` |
+| Region | the region from step 3 |
+| Access key ID / Secret | from step 5 |
+| CDN / custom domain | blank |
+| Custom endpoint | blank |
+
+Click **Save**, then **Test connection**. It writes and deletes a tiny probe
+object under `g/` using the same permissions a real upload needs, and shows
+S3's own reason if anything is off.
+
+Then do a real run: drop a JPEG in the capture folder, press **Finish Group**,
+wait for *Gallery Ready*, and scan the QR with a phone on mobile data. You
+should see the gallery, be able to tap a photo, and get a zip from
+**Download all photos**.
+
+### If a key ever leaks
+
+**IAM** → **Users** → `event-uploader-app` → **Security credentials**:
+deactivate the exposed key, create a new one, update the app, then delete the
+old key. It takes under a minute.
+
+---
+
 ## Shipping it to the event Mac
 
 ```bash
