@@ -1,6 +1,7 @@
 {
   "name": "@eps/desktop",
   "version": "0.2.0",
+  "license": "GPL-3.0",
   "private": true,
   "productName": "Event Uploader",
   "description": "Event Uploader — event-machine capture, review and publish app",

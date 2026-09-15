@@ -388,3 +388,9 @@ galleries, admin dashboard, analytics, auto-updater.
   an event is a manual job.
 - **One event at a time.** Changing the event name in Settings switches events;
   the schema supports many but the UI exposes one.
+
+---
+
+## License
+
+[GPL-3.0](LICENSE).

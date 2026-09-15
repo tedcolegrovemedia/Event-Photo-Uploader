@@ -1,6 +1,7 @@
 {
   "name": "event-photo-share",
   "version": "0.2.0",
+  "license": "GPL-3.0",
   "private": true,
   "description": "Event photography delivery: shoot, finish group, hand the guest a QR code.",
   "workspaces": [
