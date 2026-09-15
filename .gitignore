@@ -1,7 +1,7 @@
-node_modules/
-dist/
-out/
-release/
+node_modules
+dist
+out
+release
 *.tsbuildinfo
 
 # Secrets — never commit
