@@ -347,6 +347,44 @@ The QR code *is* the credential. That shapes several choices:
 
 ---
 
+## What's new
+
+### 1.2.0 — 18 Sep 2026
+
+- **Photo file names by event.** Settings → Event → *Photo file name*. Guests'
+  downloads become `spring-gala-001.jpg` instead of `photo-001.jpg`; the same
+  name is used for the S3 key and the zip entries. **Use event name** fills it
+  in from the event name; blank keeps the old naming.
+- **Settings sheet stays open.** It closes only through Save or Cancel. A stray
+  click outside it no longer discards your edits.
+- **App icon.** An olive camera with an upload arrow in the lens, replacing the
+  stock Electron icon.
+
+### 0.2.0 — 15 Sep 2026
+
+- Guest page redesigned: dark header with the event logo, square photo grid,
+  full-width download button, footer row of Instagram / Facebook / TikTok /
+  company logo. Every element is a setting and disappears when blank; the button
+  colour is configurable with automatic text contrast.
+- Security pass: renderer sandbox on, external links restricted to http(s),
+  gallery codes validated at the IPC boundary.
+- Step-by-step S3 setup guide in this README.
+
+### 2 Sep 2026
+
+- Static delivery mode (a self-contained `index.html` in the bucket) added and
+  made the default.
+- Bottom-left PNG watermark, which doubles as the gallery logo.
+- Renamed from Event Photo Share to Event Uploader. First signed and notarized
+  arm64 DMG.
+
+### 13 Aug 2026
+
+- Initial build: capture-folder watcher, review grid, Finish Group, resize and
+  upload, QR code, guest gallery web app.
+
+---
+
 ## What is built
 
 Every MVP item from the spec:
