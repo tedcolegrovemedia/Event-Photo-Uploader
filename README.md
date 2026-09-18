@@ -269,7 +269,7 @@ old key. It takes under a minute.
 npm run dist:mac:notarized
 ```
 
-Produces `apps/desktop/release/Event Uploader-0.2.0-arm64.dmg`, signed and
+Produces `apps/desktop/release/Event Uploader-1.2.0-arm64.dmg`, signed and
 notarized (plain `npm run dist:mac` signs but skips notarization). It bundles
 its own Node runtime. Read
 [docs/deploying-to-the-event-mac.md](docs/deploying-to-the-event-mac.md) first —
@@ -316,6 +316,7 @@ page, and anything left blank is simply not rendered:
 
 | Setting | On the page |
 | --- | --- |
+| Photo file name (Settings → Event) | What each download is called: `spring-gala-001.jpg` instead of `photo-001.jpg`. **Use event name** fills it in from the event name |
 | Watermark PNG | Composited on each photo, and shown as the event logo at the top |
 | Event logo link | Makes the event logo a tap target |
 | Instagram / Facebook / TikTok | One icon each, linking to the profile. Accepts a handle, an @handle, or a full URL |
@@ -378,8 +379,8 @@ galleries, admin dashboard, analytics, auto-updater.
   which uses ImageIO. Plain JPEG/PNG/TIFF work anywhere.
 - **Universal (Intel) builds need an extra npm install** for sharp's x64
   binaries. See the deployment doc.
-- **No app icon yet.** The build uses the default Electron icon. Drop a 1024×1024
-  `icon.png` into `apps/desktop/build/` and electron-builder will pick it up.
+- **App icon** is generated from `apps/desktop/build/icon.svg`. To change it,
+  edit the SVG and re-rasterize `icon.png` (1024×1024) and `icon.icns` next to it.
 - **No auto-update.** Rebuild and copy the `.dmg`.
 - **Electron's version must stay pinned** in `apps/desktop/package.json`
   (`"electron": "43.4.0"`, no caret). electron-builder downloads a

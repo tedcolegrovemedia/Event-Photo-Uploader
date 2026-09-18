@@ -29,7 +29,7 @@ licence — a needless failure on a fresh machine.
 The installer lands in `apps/desktop/release/`:
 
 ```
-Event Uploader-0.2.0-arm64.dmg
+Event Uploader-1.2.0-arm64.dmg
 ```
 
 ### Apple Silicon vs Intel
@@ -86,7 +86,7 @@ unsigned. The result opens on any Mac with a normal double-click, even offline.
 Verify with:
 
 ```bash
-spctl -a -vv -t open --context context:primary-signature "apps/desktop/release/Event Uploader-0.2.0-arm64.dmg"
+spctl -a -vv -t open --context context:primary-signature "apps/desktop/release/Event Uploader-1.2.0-arm64.dmg"
 ```
 
 which should end in `source=Notarized Developer ID`.

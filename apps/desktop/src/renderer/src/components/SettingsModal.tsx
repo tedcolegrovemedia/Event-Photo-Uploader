@@ -24,6 +24,18 @@ const EXPIRY = [
 // The renderer only takes types from @eps/core (its runtime pulls in sharp and
 // Node APIs), so this mirrors normalizeHexColor from packages/core/src/theme.ts.
 const DEFAULT_BUTTON_COLOR = '#8a9a2b';
+// Mirrors photoBaseName from packages/core/src/manifest.ts, for the live example.
+const photoBaseName = (prefix: string): string => {
+  const slug = prefix
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60);
+  return slug || 'photo';
+};
+
 const normalizeHexColor = (input: string): string | null => {
   const raw = input.trim().replace(/^#/, '').toLowerCase();
   if (/^[0-9a-f]{3}$/.test(raw)) return '#' + raw.split('').map((c) => c + c).join('');
@@ -67,8 +79,10 @@ export default function SettingsModal({ settings, onClose }: Props) {
   };
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal" onClick={(e) => e.stopPropagation()}>
+    // Deliberately no onClick on the backdrop: the sheet closes only through
+    // Save or Cancel. A stray click outside it used to discard every edit.
+    <div className="modal-backdrop">
+      <div className="modal">
         <h2>Settings</h2>
 
         <section>
@@ -104,6 +118,32 @@ export default function SettingsModal({ settings, onClose }: Props) {
               <button onClick={() => void pickFolder('workDir')}>Choose…</button>
             </div>
           </label>
+
+          <label>
+            Photo file name (optional)
+            <div className="row">
+              <input
+                value={draft.photoNamePrefix}
+                placeholder="photo"
+                onChange={(e) => set('photoNamePrefix', e.target.value)}
+              />
+              <button className="ghost" onClick={() => set('photoNamePrefix', draft.eventName)}>
+                Use event name
+              </button>
+              {draft.photoNamePrefix && (
+                <button className="ghost" onClick={() => set('photoNamePrefix', '')}>
+                  Clear
+                </button>
+              )}
+            </div>
+          </label>
+          {issues.photoNamePrefix && <p className="error">{issues.photoNamePrefix}</p>}
+          <p className="hint">
+            Guests' downloads will be named{' '}
+            <code>{photoBaseName(draft.photoNamePrefix)}-001.jpg</code>,{' '}
+            <code>{photoBaseName(draft.photoNamePrefix)}-002.jpg</code>, … Applies to
+            galleries published after you save.
+          </p>
         </section>
 
         <section>

@@ -140,6 +140,11 @@ export interface AppSettings {
   expiresInDays: number | null;
   /** Copy originals into workDir/originals instead of leaving them in place. */
   copyOriginals: boolean;
+  /**
+   * Base name for delivered photo files, e.g. "spring-gala" gives
+   * spring-gala-001.jpg on the guest's phone. Blank = photo-001.jpg.
+   */
+  photoNamePrefix: string;
   /** PNG with transparency, composited bottom-left on every delivered photo. Blank = off. */
   watermarkPath: string;
   /** Watermark width as a percentage of the delivered photo's width. */

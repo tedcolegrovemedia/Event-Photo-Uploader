@@ -15,6 +15,7 @@ import {
   makeLogoPng,
   manifestKey,
   pageKey,
+  photoFilename,
   photoKey,
   processImage,
   renderStaticGallery,
@@ -137,7 +138,7 @@ export class PublishPipeline {
       // Skip work already done by a previous, failed attempt.
       if (photo.processed_path && photo.width && photo.height) continue;
 
-      const dest = join(outDir, `photo-${String(index + 1).padStart(3, '0')}.jpg`);
+      const dest = join(outDir, photoFilename(index, settings.photoNamePrefix));
       const result = await processImage({
         sourcePath: photo.original_path,
         destPath: dest,
@@ -171,7 +172,7 @@ export class PublishPipeline {
     const manifestPhotos: ManifestPhoto[] = new Array(photos.length);
 
     await mapLimit(photos, UPLOAD_CONCURRENCY, async (photo, index) => {
-      const key = photoKey(event.slug, gallery.gallery_code, index);
+      const key = photoKey(event.slug, gallery.gallery_code, index, settings.photoNamePrefix);
       if (!photo.processed_path) {
         throw new Error(`No processed file for ${photo.original_filename}`);
       }
@@ -187,7 +188,7 @@ export class PublishPipeline {
       }
 
       manifestPhotos[index] = {
-        filename: `photo-${String(index + 1).padStart(3, '0')}.jpg`,
+        filename: photoFilename(index, settings.photoNamePrefix),
         key,
         url: storage.getPublicUrl(key),
         width: photo.width ?? 0,

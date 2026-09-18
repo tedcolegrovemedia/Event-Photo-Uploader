@@ -16,14 +16,36 @@ export function galleryPrefix(eventSlug: string, code: string): string {
   return `events/${eventSlug}/g/${code}`;
 }
 
+/**
+ * The base name guests see on their downloads. The operator's prefix is
+ * reduced to a URL- and filesystem-safe slug so it can double as the S3 key;
+ * blank (or all punctuation) falls back to the generic "photo".
+ */
+export function photoBaseName(prefix: string): string {
+  const slug = prefix
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60);
+  return slug || 'photo';
+}
+
+/** photo-001.jpg, spring-gala-012.jpg, … */
+export function photoFilename(index: number, prefix = '', ext = 'jpg'): string {
+  const n = String(index + 1).padStart(3, '0');
+  return `${photoBaseName(prefix)}-${n}.${ext}`;
+}
+
 export function photoKey(
   eventSlug: string,
   code: string,
   index: number,
+  prefix = '',
   ext = 'jpg',
 ): string {
-  const n = String(index + 1).padStart(3, '0');
-  return `${galleryPrefix(eventSlug, code)}/photo-${n}.${ext}`;
+  return `${galleryPrefix(eventSlug, code)}/${photoFilename(index, prefix, ext)}`;
 }
 
 export function logoKey(eventSlug: string, code: string): string {

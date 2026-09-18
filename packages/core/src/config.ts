@@ -18,6 +18,7 @@ export function defaultSettings(): AppSettings {
     galleryPathPrefix: 'g',
     expiresInDays: 30,
     copyOriginals: false,
+    photoNamePrefix: '',
     watermarkPath: '',
     watermarkWidthPercent: 15,
     watermarkMargin: 20,
@@ -86,6 +87,16 @@ export function validateSettings(s: AppSettings): ValidationIssue[] {
   }
   if (s.jpegQuality < 50 || s.jpegQuality > 100) {
     issues.push({ field: 'jpegQuality', message: 'JPEG quality must be 50–100.' });
+  }
+
+  if (s.photoNamePrefix.trim() && !/[a-z0-9]/i.test(s.photoNamePrefix.normalize('NFKD'))) {
+    issues.push({
+      field: 'photoNamePrefix',
+      message: 'Photo name needs at least one letter or number.',
+    });
+  }
+  if (s.photoNamePrefix.length > 60) {
+    issues.push({ field: 'photoNamePrefix', message: 'Photo name must be 60 characters or fewer.' });
   }
 
   if (s.watermarkPath.trim()) {
