@@ -357,8 +357,8 @@ The QR code *is* the credential. That shapes several choices:
   in from the event name; blank keeps the old naming.
 - **Settings sheet stays open.** It closes only through Save or Cancel. A stray
   click outside it no longer discards your edits.
-- **App icon.** An olive camera with an upload arrow in the lens, replacing the
-  stock Electron icon.
+- **App icon.** Ted's camera-with-upload-arrow mark on a teal gradient,
+  replacing the stock Electron icon.
 
 ### 0.2.0 — 15 Sep 2026
 
@@ -417,8 +417,9 @@ galleries, admin dashboard, analytics, auto-updater.
   which uses ImageIO. Plain JPEG/PNG/TIFF work anywhere.
 - **Universal (Intel) builds need an extra npm install** for sharp's x64
   binaries. See the deployment doc.
-- **App icon** is generated from `apps/desktop/build/icon.svg`. To change it,
-  edit the SVG and re-rasterize `icon.png` (1024×1024) and `icon.icns` next to it.
+- **App icon** is generated from `apps/desktop/build/icon.svg` by
+  `node scripts/make-icon.mjs`, which clips the artwork to the macOS rounded
+  square and writes `icon.png` and `icon.icns` next to it.
 - **No auto-update.** Rebuild and copy the `.dmg`.
 - **Electron's version must stay pinned** in `apps/desktop/package.json`
   (`"electron": "43.4.0"`, no caret). electron-builder downloads a

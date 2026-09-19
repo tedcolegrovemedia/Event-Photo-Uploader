@@ -125,7 +125,7 @@ than local disk. Measured: 300 files in 44.6 s versus 0.049 s. Installing
 | 13 Aug 2026 | Spec written. Full MVP built and documented the same day. Server delivery mode. |
 | 2 Sep 2026 | Static delivery mode added and made the default. Confirmed end to end against a real bucket after fixing IAM name mismatches. Bottom-left PNG watermark added; it doubles as the gallery logo. App renamed Event Uploader. First signed, notarized arm64 DMG. |
 | 15 Sep 2026 | Guest page redesigned to a Figma mock: dark header with clickable event logo, square grid, full-width download button, footer row of Instagram, Facebook, TikTok, and company logo. Every element is a setting and disappears when blank; button colour is configurable with automatic text contrast. Version 0.2.0. Security pass: renderer sandbox on, external links restricted to http(s), gallery codes validated at the IPC boundary. Git history created, README gained a step-by-step S3 walkthrough, pushed to GitHub under GPL-3.0. |
-| 18 Sep 2026 | Photo files can be named after the event (Settings → Event → Photo file name), the settings sheet no longer closes on a stray click outside it, and the app got its own icon: an olive camera with an upload arrow in the lens. Version 1.2.0, signed, notarized and stapled. |
+| 18 Sep 2026 | Photo files can be named after the event (Settings → Event → Photo file name), the settings sheet no longer closes on a stray click outside it, and the app got its own icon: Ted's camera-with-upload-arrow mark on a teal gradient, drawn in Illustrator. Version 1.2.0, signed, notarized and stapled. |
 
 ## Gallery page design
 
